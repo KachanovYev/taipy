@@ -9,6 +9,7 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
+import itertools
 from typing import Callable, List, Optional, Type, Union, cast
 
 from taipy.common.config import Config
@@ -52,10 +53,16 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         return _OrchestratorFactory._build_orchestrator()
 
     @classmethod
-    def _set(cls, task: Task) -> None:
-        cls.__save_data_nodes(task.input.values())
-        cls.__save_data_nodes(task.output.values())
-        super()._set(task)
+    def _create(cls, task: Task) -> None:
+        for dn in itertools.chain(task.input.values(), task.output.values()):
+            _DataManagerFactory._build_manager()._repository._save(dn)
+        cls._repository._save(task)
+
+    @classmethod
+    def _update(cls, task: Task) -> None:
+        for dn in itertools.chain(task.input.values(), task.output.values()):
+            _DataManagerFactory._build_manager()._update(dn)
+        super()._update(task)
 
     @classmethod
     def _get_owner_id(
@@ -127,7 +134,7 @@ class _TaskManager(_Manager[Task], _VersionMixin):
                 )
                 for dn in set(inputs + outputs):
                     dn._parent_ids.update([task.id])
-                cls._set(task)
+                cls._create(task)
                 Notifier.publish(_make_event(task, EventOperation.CREATION))
                 tasks.append(task)
         return tasks
@@ -139,12 +146,6 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         """
         filters = cls._build_filters_with_version(version_number)
         return cls._repository._load_all(filters)
-
-    @classmethod
-    def __save_data_nodes(cls, data_nodes) -> None:
-        data_manager = _DataManagerFactory._build_manager()
-        for i in data_nodes:
-            data_manager._set(i)
 
     @classmethod
     def _hard_delete(cls, task_id: TaskId) -> None:

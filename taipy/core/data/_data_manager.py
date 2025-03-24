@@ -66,7 +66,7 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
             dn_configs_and_owner_id, cls._build_filters_with_version(None)
         )
         return {
-            dn_config: data_nodes.get((dn_config, owner_id)) or cls._create_and_set(dn_config, owner_id, None)
+            dn_config: data_nodes.get((dn_config, owner_id)) or cls._create(dn_config, owner_id, None)
             for dn_config, owner_id in dn_configs_and_owner_id
         }
 
@@ -84,11 +84,11 @@ class _DataManager(_Manager[DataNode], _VersionMixin):
         return reason_collection
 
     @classmethod
-    def _create_and_set(
+    def _create(
         cls, data_node_config: DataNodeConfig, owner_id: Optional[str], parent_ids: Optional[Set[str]]
     ) -> DataNode:
         data_node = cls.__create(data_node_config, owner_id, parent_ids)
-        cls._set(data_node)
+        cls._repository._save(data_node)
         Notifier.publish(_make_event(data_node, EventOperation.CREATION))
         return data_node
 

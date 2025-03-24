@@ -155,8 +155,7 @@ class _FileDataNodeMixin:
         try:
             upload_data = self._read_from_path(str(up_path))
         except Exception as err:
-            self.__logger.error(f"Error uploading `{up_path.name}` to data "
-                                f"node `{self.id}`:")  # type: ignore[attr-defined]
+            self.__logger.error(f"Error uploading `{up_path.name}` to data " f"node `{self.id}`:")  # type: ignore[attr-defined]
             self.__logger.error(f"Error: {err}")
             reasons._add_reason(self.id, UploadFileCanNotBeRead(up_path.name, self.id))  # type: ignore[attr-defined]
             return reasons
@@ -179,12 +178,15 @@ class _FileDataNodeMixin:
 
         shutil.copy(up_path, self.path)
 
-        self.track_edit(timestamp=datetime.now(),  # type: ignore[attr-defined]
-                        editor_id=editor_id,
-                        comment=comment, **kwargs)
+        self.track_edit(  # type: ignore[attr-defined]
+            timestamp=datetime.now(),
+            editor_id=editor_id,
+            comment=comment,
+            **kwargs,
+        )
         self.unlock_edit()  # type: ignore[attr-defined]
 
-        _DataManagerFactory._build_manager()._set(self)  # type: ignore[arg-type]
+        _DataManagerFactory._build_manager()._update(self)  # type: ignore[arg-type]
 
         return reasons
 

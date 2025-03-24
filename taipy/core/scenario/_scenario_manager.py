@@ -189,14 +189,14 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         for task in tasks:
             if scenario_id not in task._parent_ids:
                 task._parent_ids.update([scenario_id])
-                _task_manager._set(task)
+                _task_manager._update(task)
 
         for dn in additional_data_nodes.values():
             if scenario_id not in dn._parent_ids:
                 dn._parent_ids.update([scenario_id])
-                _data_manager._set(dn)
+                _data_manager._update(dn)
 
-        cls._set(scenario)
+        cls._repository._save(scenario)
 
         if not scenario._is_consistent():
             raise InvalidScenario(scenario.id)
@@ -381,7 +381,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         if len(tags) > 0 and tag not in tags:
             raise UnauthorizedTagError(f"Tag `{tag}` not authorized by scenario configuration `{scenario.config_id}`")
         scenario._add_tag(tag)
-        cls._set(scenario)
+        cls._update(scenario)
         Notifier.publish(
             _make_event(scenario, EventOperation.UPDATE, attribute_name="tags", attribute_value=scenario.tags)
         )
@@ -389,7 +389,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
     @classmethod
     def _untag(cls, scenario: Scenario, tag: str) -> None:
         scenario._remove_tag(tag)
-        cls._set(scenario)
+        cls._update(scenario)
         Notifier.publish(
             _make_event(scenario, EventOperation.UPDATE, attribute_name="tags", attribute_value=scenario.tags)
         )
@@ -529,7 +529,7 @@ class _ScenarioManager(_Manager[Scenario], _VersionMixin):
         scenario: Scenario,
         new_creation_date: Optional[datetime] = None,
         new_name: Optional[str] = None,
-        data_to_duplicate: Union[bool, Set[str]] = True
+        data_to_duplicate: Union[bool, Set[str]] = True,
     ) -> Scenario:
         """Create a duplicated scenario with its related entities.
 

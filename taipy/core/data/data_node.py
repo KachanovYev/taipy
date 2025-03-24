@@ -444,7 +444,7 @@ class DataNode(_Entity, _Labeled):
         self._append(data)
         self.track_edit(editor_id=editor_id, comment=comment, **kwargs)
         self.unlock_edit()
-        _DataManagerFactory._build_manager()._set(self)
+        _DataManagerFactory._build_manager()._update(self)
 
     def write(
         self,
@@ -478,7 +478,7 @@ class DataNode(_Entity, _Labeled):
         self.unlock_edit()
         from ._data_manager_factory import _DataManagerFactory
 
-        _DataManagerFactory._build_manager()._set(self)
+        _DataManagerFactory._build_manager()._update(self)
 
     def track_edit(
         self,

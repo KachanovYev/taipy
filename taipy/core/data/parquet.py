@@ -187,7 +187,6 @@ class ParquetDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
         # Ensure that the columns are strings, otherwise writing will fail with pandas 1.3.5
         df.columns = df.columns.astype(str)
         df.to_parquet(self._path, **kwargs)
-        self.track_edit(timestamp=datetime.now(), editor_id=editor_id)
 
     def read_with_kwargs(self, **read_kwargs):
         """Read data from this data node.

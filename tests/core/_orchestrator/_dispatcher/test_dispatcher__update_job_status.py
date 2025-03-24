@@ -26,12 +26,13 @@ def nothing(*args):
 def _error():
     raise RuntimeError("Something bad has happened")
 
+
 def test_update_job_status_no_exception():
     output = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
-    task = Task("config_id",  {}, nothing, output=[output])
-    _TaskManagerFactory._build_manager()._set(task)
+    task = Task("config_id", {}, nothing, output=[output])
+    _TaskManagerFactory._build_manager()._create(task)
     job = Job(JobId("id"), task, "s_id", task.id)
-    _JobManagerFactory._build_manager()._set(job)
+    _JobManagerFactory._build_manager()._repository._save(job)
 
     _JobDispatcher(_OrchestratorFactory._orchestrator)._update_job_status(job, None)
 
@@ -49,9 +50,9 @@ def test_update_job_status_no_exception():
 
 def test_update_job_status_with_one_exception():
     task = Task("config_id", {}, nothing)
-    _TaskManagerFactory._build_manager()._set(task)
+    _TaskManagerFactory._build_manager()._repository._save(task)
     job = Job(JobId("id"), task, "s_id", task.id)
-    _JobManagerFactory._build_manager()._set(job)
+    _JobManagerFactory._build_manager()._repository._save(job)
     e = Exception("test")
     _JobDispatcher(_OrchestratorFactory._orchestrator)._update_job_status(job, [e])
 
@@ -62,9 +63,9 @@ def test_update_job_status_with_one_exception():
 
 def test_update_job_status_with_exceptions():
     task = Task("config_id", {}, nothing)
-    _TaskManagerFactory._build_manager()._set(task)
+    _TaskManagerFactory._build_manager()._repository._save(task)
     job = Job(JobId("id"), task, "s_id", task.id)
-    _JobManagerFactory._build_manager()._set(job)
+    _JobManagerFactory._build_manager()._repository._save(job)
     e_1 = Exception("test1")
     e_2 = Exception("test2")
     _JobDispatcher(_OrchestratorFactory._orchestrator)._update_job_status(job, [e_1, e_2])

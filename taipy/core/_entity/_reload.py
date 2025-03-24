@@ -100,9 +100,9 @@ def _self_reload(manager: str):
 
 
 def _self_setter(manager):
-    def __set_entity(fct):
+    def __update_entity(fct):
         @functools.wraps(fct)
-        def _do_set_entity(self, *args, **kwargs):
+        def _do_update_entity(self, *args, **kwargs):
             fct(self, *args, **kwargs)
             value = args[0] if len(args) == 1 else args
             event = _make_event(
@@ -114,11 +114,11 @@ def _self_setter(manager):
             if not self._is_in_context:
                 entity = _Reloader()._reload(manager, self)
                 fct(entity, *args, **kwargs)
-                _Reloader._get_manager(manager)._set(entity)
+                _Reloader._get_manager(manager)._update(entity)
                 Notifier.publish(event)
             else:
                 self._in_context_attributes_changed_collector.append(event)
 
-        return _do_set_entity
+        return _do_update_entity
 
-    return __set_entity
+    return __update_entity

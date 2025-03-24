@@ -18,6 +18,7 @@ import pandas as pd
 import pytest
 
 from taipy import Scope
+from taipy.core.data._data_manager_factory import _DataManagerFactory
 from taipy.core.data.parquet import ParquetDataNode
 from taipy.core.exceptions.exceptions import NoData
 
@@ -170,6 +171,7 @@ class TestReadParquetDataNode:
         dn = ParquetDataNode(
             "foo", Scope.SCENARIO, properties={"path": temp_file_path, "engine": engine, "read_kwargs": read_kwargs}
         )
+        _DataManagerFactory._build_manager()._repository._save(dn)
 
         df = pd.read_csv(os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/example.csv"))
         dn.write(df)

@@ -90,11 +90,11 @@ def _error():
 
 
 def test_job_equals(job):
-    _TaskManagerFactory._build_manager()._set(job.task)
+    _TaskManagerFactory._build_manager()._repository._save(job.task)
     job_manager = _JobManagerFactory()._build_manager()
 
     job_id = job.id
-    job_manager._set(job)
+    job_manager._repository._save(job)
 
     # To test if instance is same type
     task = Task("task", {}, print, [], [], job_id)
@@ -108,7 +108,7 @@ def test_job_equals(job):
 def test_create_job(scenario, task, job):
     from taipy.core.scenario._scenario_manager_factory import _ScenarioManagerFactory
 
-    _ScenarioManagerFactory._build_manager()._set(scenario)
+    _ScenarioManagerFactory._build_manager()._repository._save(scenario)
 
     assert job.id == "id1"
     assert task in job
@@ -143,6 +143,7 @@ def test_comparison(task):
 def test_status_job(task):
     submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX, task.config_id)
     job = Job("job_id", task, submission.id, "SCENARIO_scenario_config")
+    _JobManagerFactory._build_manager()._repository._save(job)
     submission.jobs = [job]
 
     assert job.is_submitted()
@@ -173,6 +174,7 @@ def test_status_job(task):
 def test_stacktrace_job(task):
     submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX, task.config_id)
     job = Job("job_id", task, submission.id, "SCENARIO_scenario_config")
+    _JobManagerFactory._build_manager()._repository._save(job)
 
     fake_stacktraces = [
         """Traceback (most recent call last):
@@ -190,6 +192,7 @@ def test_notification_job(task):
     subscribe = MagicMock()
     submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX, task.config_id)
     job = Job("job_id", task, submission.id, "SCENARIO_scenario_config")
+    _JobManagerFactory._build_manager()._repository._save(job)
     submission.jobs = [job]
 
     job._on_status_change(subscribe)
@@ -222,8 +225,10 @@ def test_handle_exception_in_user_function(task_id, job_id):
 def test_handle_exception_in_input_data_node(task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
     task = Task(config_id="name", properties={}, input=[data_node], function=print, output=[], id=task_id)
+    _TaskManagerFactory._build_manager()._create(task)
     submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX, task.config_id)
     job = Job(job_id, task, submission.id, "scenario_entity_id")
+    _JobManagerFactory._build_manager()._repository._save(job)
     submission.jobs = [job]
 
     _dispatch(task, job)
@@ -236,8 +241,10 @@ def test_handle_exception_in_input_data_node(task_id, job_id):
 def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_id, job_id):
     data_node = InMemoryDataNode("data_node", scope=Scope.SCENARIO)
     task = Task(config_id="name", properties={}, input=[], function=_foo, output=[data_node], id=task_id)
+    _TaskManagerFactory._build_manager()._create(task)
     submission = _SubmissionManagerFactory._build_manager()._create(task.id, task._ID_PREFIX, task.config_id)
     job = Job(job_id, task, submission.id, "scenario_entity_id")
+    _JobManagerFactory._build_manager()._repository._save(job)
     submission.jobs = [job]
 
     _dispatch(task, job)
@@ -248,16 +255,16 @@ def test_handle_exception_in_ouptut_data_node(replace_in_memory_write_fct, task_
     assert "taipy.core.exceptions.exceptions.DataNodeWritingError" in str(job.stacktrace[0])
 
 
-def test_auto_set_and_reload(current_datetime, job_id):
+def test_auto_update_and_reload(current_datetime, job_id):
     task_1 = Task(config_id="name_1", properties={}, function=_foo, id=TaskId("task_1"))
     task_2 = Task(config_id="name_2", properties={}, function=_foo, id=TaskId("task_2"))
     submission = _SubmissionManagerFactory._build_manager()._create(task_1.id, task_1._ID_PREFIX, task_1.config_id)
     job_1 = Job(job_id, task_1, submission.id, "scenario_entity_id")
     submission.jobs = [job_1]
 
-    _TaskManager._set(task_1)
-    _TaskManager._set(task_2)
-    _JobManager._set(job_1)
+    _TaskManager._repository._save(task_1)
+    _TaskManager._repository._save(task_2)
+    _JobManager._repository._save(job_1)
 
     job_2 = _JobManager._get(job_1, "submit_id_2")
 
@@ -334,8 +341,8 @@ def test_status_records(job_id):
         job_1 = Job(job_id, task_1, submission.id, "scenario_entity_id")
     submission.jobs = [job_1]
 
-    _TaskManager._set(task_1)
-    _JobManager._set(job_1)
+    _TaskManager._repository._save(task_1)
+    _JobManager._repository._save(job_1)
 
     assert job_1._status_change_records == {"SUBMITTED": datetime(2024, 9, 25, 13, 30, 30)}
     assert job_1.submitted_at == datetime(2024, 9, 25, 13, 30, 30)
@@ -397,8 +404,8 @@ def test_is_deletable():
 
 def _dispatch(task: Task, job: Job, mode=JobConfig._DEVELOPMENT_MODE):
     Config.configure_job_executions(mode=mode)
-    _TaskManager._set(task)
-    _JobManager._set(job)
+    _TaskManager._repository._save(task)
+    _JobManager._repository._save(job)
     dispatcher: Union[_StandaloneJobDispatcher, _DevelopmentJobDispatcher] = _StandaloneJobDispatcher(
         cast(_AbstractOrchestrator, _OrchestratorFactory._orchestrator)
     )
