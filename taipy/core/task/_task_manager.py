@@ -59,12 +59,6 @@ class _TaskManager(_Manager[Task], _VersionMixin):
         cls._repository._save(task)
 
     @classmethod
-    def _update(cls, task: Task) -> None:
-        for dn in itertools.chain(task.input.values(), task.output.values()):
-            _DataManagerFactory._build_manager()._update(dn)
-        super()._update(task)
-
-    @classmethod
     def _get_owner_id(
         cls, scope, cycle_id, scenario_id
     ) -> Union[Optional[SequenceId], Optional[ScenarioId], Optional[CycleId]]:
