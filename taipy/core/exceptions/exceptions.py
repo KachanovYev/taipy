@@ -65,7 +65,10 @@ class MultipleDataNodeFromSameConfigWithSameOwner(Exception):
 
 
 class NoData(Exception):
-    """Raised if a data node is read before it has been written."""
+    """Raised if a data node is read before it has been written.
+
+    This exception can be raised by `DataNode.read_or_raise()^`.
+    """
 
 
 class UnknownDatabaseEngine(Exception):

@@ -165,6 +165,8 @@ class TestJSONDataNode:
         assert not_existing_json.read() is None
         with pytest.raises(NoData):
             _DataManagerFactory._build_manager()._read(not_existing_json)
+        with pytest.raises(NoData):
+            not_existing_json.read_or_raise()
 
     def test_read(self):
         path_1 = os.path.join(pathlib.Path(__file__).parent.resolve(), "data_sample/json/example_list.json")

@@ -67,6 +67,8 @@ def test_raise_no_data_with_header():
     assert not_existing_excel.read() is None
     with pytest.raises(NoData):
         _DataManagerFactory._build_manager()._read(not_existing_excel)
+    with pytest.raises(NoData):
+        not_existing_excel.read_or_raise()
 
 
 def test_read_empty_excel_with_header():

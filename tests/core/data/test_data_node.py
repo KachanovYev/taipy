@@ -153,6 +153,8 @@ class TestDataNode:
         assert dn.read() is None
         with pytest.raises(NoData):
             _DataManagerFactory._build_manager()._read(dn)
+        with pytest.raises(NoData):
+            dn.read_or_raise()
         assert dn.write_has_been_called == 0
         assert dn.read_has_been_called == 0
         assert not dn.is_ready_for_reading

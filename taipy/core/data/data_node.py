@@ -395,6 +395,19 @@ class DataNode(_Entity, _Labeled):
         """
         raise NotImplementedError
 
+    def read_or_raise(self) -> Any:
+        """Read the data referenced by this data node.
+
+        Returns:
+            The data referenced by this data node.
+
+        Raises:
+            NoData^: If the data has not been written yet.
+        """
+        from ._data_manager_factory import _DataManagerFactory
+
+        return _DataManagerFactory._build_manager()._read(self)
+
     def read(self) -> Any:
         """Read the data referenced by this data node.
 
