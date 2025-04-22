@@ -33,7 +33,7 @@ def _check_dependency_is_installed(
 
     if not util.find_spec(package_name):
         raise RuntimeError(
-            f"Cannot use {module_name} as {package_name} package is not installed. Please install it  "
+            f"Cannot use {module_name} as {package_name} package is not installed. Please install it "
             f"using `pip install {taipy_sublibrary}[{extra_taipy_package_name}]`."
         )
 
