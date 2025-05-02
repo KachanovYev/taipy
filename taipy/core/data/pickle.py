@@ -21,7 +21,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class PickleDataNode(DataNode, _FileDataNodeMixin):
+class PickleDataNode(_FileDataNodeMixin, DataNode):
     """Data Node stored as a pickle file.
 
     The *properties* attribute can contain the following optional entries:
@@ -119,5 +119,8 @@ class PickleDataNode(DataNode, _FileDataNodeMixin):
             return pickle.load(pf)
 
     def _write(self, data):
-        with open(self._path, "wb") as pf:
+        self._write_to_path(self._path, data)
+
+    def _write_to_path(self, path: str, data: Any):
+        with open(path, "wb") as pf:
             pickle.dump(data, pf)
