@@ -210,9 +210,9 @@ class DataNode(_Entity, _Labeled):
     @_self_reload(_MANAGER_NAME)
     def last_edit_date(self) -> Optional[datetime]:
         """The date and time of the last modification."""
-        try:
+        if hasattr(self, "_get_last_modified_datetime"):
             last_modified_datetime = self._get_last_modified_datetime()
-        except NotImplementedError:
+        else:
             last_modified_datetime = None
 
         if last_modified_datetime and last_modified_datetime > self._last_edit_date:  # type: ignore
@@ -507,9 +507,9 @@ class DataNode(_Entity, _Labeled):
         if comment:
             edit[EDIT_COMMENT_KEY] = comment
         if not timestamp:
-            try:
+            if hasattr(self, "_get_last_modified_datetime"):
                 timestamp = self._get_last_modified_datetime() or datetime.now()
-            except NotImplementedError:
+            else:
                 timestamp = datetime.now()
         edit[EDIT_TIMESTAMP_KEY] = timestamp
         self.last_edit_date = edit.get(EDIT_TIMESTAMP_KEY)
@@ -712,9 +712,6 @@ class DataNode(_Entity, _Labeled):
     def _get_user_properties(self) -> Dict[str, Any]:
         """Get user properties."""
         return {key: value for key, value in self.properties.items() if key not in self._TAIPY_PROPERTIES}
-
-    def _get_last_modified_datetime(self) -> Optional[datetime]:
-        raise NotImplementedError
 
     @staticmethod
     def _class_map():

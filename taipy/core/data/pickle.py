@@ -21,7 +21,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class PickleDataNode(_FileDataNodeMixin, DataNode):
+class PickleDataNode(DataNode, _FileDataNodeMixin):
     """Data Node stored as a pickle file.
 
     The *properties* attribute can contain the following optional entries:

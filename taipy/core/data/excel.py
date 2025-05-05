@@ -26,7 +26,7 @@ from .data_node import DataNode
 from .data_node_id import DataNodeId, Edit
 
 
-class ExcelDataNode(_FileDataNodeMixin, DataNode, _TabularDataNodeMixin):
+class ExcelDataNode(DataNode, _FileDataNodeMixin, _TabularDataNodeMixin):
     """Data Node stored as an Excel file.
 
     The Excel file format is _xlsx_.
