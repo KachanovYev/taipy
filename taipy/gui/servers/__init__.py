@@ -9,18 +9,10 @@
 # an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the
 # specific language governing permissions and limitations under the License.
 
-import inspect
+from .server import _Server
+from .utils import get_server_request_accessor
 
-from taipy.gui import Gui, Html
-
-
-def test_simple_html(gui: Gui, helpers):
-    # html_string = "<html><head></head><body><h1>test</h1><taipy:field value=\"test\"/></body></html>"
-    html_string = "<html><head></head><body><h1>test</h1></body></html>"
-    gui._set_frame(inspect.currentframe())
-    gui.add_page("test", Html(html_string))
-    gui.run(run_server=False)
-    client = gui._server.test_client()
-    response = client.get("/taipy-jsx/test")
-    jsx = helpers.get_response_data(response, gui)["jsx"]
-    assert jsx == "<h1>test</h1>"
+__all__ = [
+    "_Server",
+    "get_server_request_accessor",
+]
