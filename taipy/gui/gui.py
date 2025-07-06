@@ -31,6 +31,7 @@ from urllib.parse import unquote, urlencode, urlparse
 
 import markdown as md_lib
 import tzlocal
+import zoneinfo
 from werkzeug.utils import secure_filename
 
 import __main__  # noqa: F401
@@ -109,6 +110,34 @@ from .utils.table_col_builder import _enhance_columns
 from .utils.threads import _invoke_async_callback
 
 
+TIMEZONE_FALLBACKS = {
+    "Asia/Beijing": "Asia/Shanghai",
+}
+
+
+def _get_valid_timezone():
+    """
+    Determines a valid timezone name for the current system.
+
+    Returns:
+        str: The name of the timezone, or 'UTC' if an error occurs or the timezone is not found.
+
+    This function tries to get the local timezone using `tzlocal.get_localzone()`, applies any necessary
+    fallbacks from the TIMEZONE_FALLBACKS dictionary, and checks if the timezone is valid for `zoneinfo`.
+    If the timezone is not found or an error occurs, it falls back to 'UTC'.
+    """
+    try:
+        tzname = str(tzlocal.get_localzone())
+        tzname = TIMEZONE_FALLBACKS.get(tzname, tzname)
+        try:
+            zoneinfo.ZoneInfo(tzname)
+        except zoneinfo.ZoneInfoNotFoundError:
+            tzname = "UTC"
+        return tzname
+    except (zoneinfo.ZoneInfoNotFoundError, AttributeError, KeyError):
+        return "UTC"
+
+
 class Gui:
     """Entry point for the Graphical User Interface generation.
 
@@ -158,7 +187,7 @@ class Gui:
         _USER_CONTENT_URL,
     ]
 
-    __LOCAL_TZ = str(tzlocal.get_localzone())
+    __LOCAL_TZ = _get_valid_timezone()
 
     __extensions: t.Dict[str, t.List[ElementLibrary]] = {}
 
