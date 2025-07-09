@@ -129,10 +129,7 @@ def _get_valid_timezone():
     try:
         tzname = str(tzlocal.get_localzone())
         tzname = TIMEZONE_FALLBACKS.get(tzname, tzname)
-        try:
-            zoneinfo.ZoneInfo(tzname)
-        except zoneinfo.ZoneInfoNotFoundError:
-            tzname = "UTC"
+        zoneinfo.ZoneInfo(tzname)
         return tzname
     except (zoneinfo.ZoneInfoNotFoundError, AttributeError, KeyError):
         return "UTC"
