@@ -122,16 +122,23 @@ def _get_valid_timezone():
     Returns:
         str: The name of the timezone, or 'UTC' if an error occurs or the timezone is not found.
 
-    This function tries to get the local timezone using `tzlocal.get_localzone()`, applies any necessary
-    fallbacks from the TIMEZONE_FALLBACKS dictionary, and checks if the timezone is valid for `zoneinfo`.
-    If the timezone is not found or an error occurs, it falls back to 'UTC'.
+     This function:
+        - Retrieves the local timezone using `tzlocal.get_localzone()`.
+        - Applies a fallback from the TIMEZONE_FALLBACKS dictionary if needed.
+        - Validates the timezone using `zoneinfo.ZoneInfo`.
+        - Falls back to 'UTC' if any error occurs.
+
+    Warning:
+        - `tzlocal.get_localzone()` may raise AttributeError if the local timezone cannot be determined.
+        - `TIMEZONE_FALLBACKS.get(tzname, tzname)` is safe and does not raise KeyError.
+        - `zoneinfo.ZoneInfo(tzname)` raises `ZoneInfoNotFoundError` if the timezone is unknown.
     """
     try:
         tzname = str(tzlocal.get_localzone())
         tzname = TIMEZONE_FALLBACKS.get(tzname, tzname)
         zoneinfo.ZoneInfo(tzname)
         return tzname
-    except (zoneinfo.ZoneInfoNotFoundError, AttributeError, KeyError):
+    except (zoneinfo.ZoneInfoNotFoundError, AttributeError):
         return "UTC"
 
 
