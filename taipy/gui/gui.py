@@ -139,6 +139,7 @@ def _get_valid_timezone():
         zoneinfo.ZoneInfo(tzname)
         return tzname
     except (zoneinfo.ZoneInfoNotFoundError, AttributeError):
+        _warn('Cannot retrieve time zone, default is "UTC"', e)
         return "UTC"
 
 
