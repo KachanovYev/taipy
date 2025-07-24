@@ -244,9 +244,9 @@ class _Config(object):
             config["run_browser"] = True
         if "--no-run-browser" in sys.argv:
             config["run_browser"] = False
-        elif hasattr(args, "taipy_run_browser") and args.taipy_run_browser:
+        elif getattr(args, "taipy_run_browser", False):
             config["run_browser"] = True
-        elif hasattr(args, "taipy_no_run_browser") and args.taipy_no_run_browser:
+        elif getattr(args, "taipy_no_run_browser", False):
             config["run_browser"] = False
 
     def _handle_dark_mode(self, args, config):
