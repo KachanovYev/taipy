@@ -11,6 +11,7 @@
 
 import os
 import re
+import sys
 import typing as t
 
 import pytz
@@ -216,9 +217,14 @@ class _Config(object):
             config["use_reloader"] = True
         if args.taipy_no_reloader:
             config["use_reloader"] = False
-        if args.taipy_run_browser:
+        config["run_browser"] = False
+        if "--run-browser" in sys.argv:
             config["run_browser"] = True
-        if args.taipy_no_run_browser:
+        if "--no-run-browser" in sys.argv:
+            config["run_browser"] = False
+        elif hasattr(args, "taipy_run_browser") and args.taipy_run_browser:
+            config["run_browser"] = True
+        elif hasattr(args, "taipy_no_run_browser") and args.taipy_no_run_browser:
             config["run_browser"] = False
         if args.taipy_dark_mode or args.taipy_light_mode:
             config["dark_mode"] = not args.taipy_light_mode
