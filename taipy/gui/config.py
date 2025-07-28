@@ -11,7 +11,6 @@
 
 import os
 import re
-import sys
 import typing as t
 
 import pytz
@@ -198,22 +197,8 @@ class _Config(object):
     def _handle_argparse(self):
         _GuiCLI.create_parser()
         args = _GuiCLI.handle_command()
+
         config = self.config
-
-        self._handle_port(args, config)
-        self._handle_host(args, config)
-        self._handle_debug(args, config)
-        self._handle_reloader(args, config)
-        self._handle_run_browser(args, config)
-        self._handle_dark_mode(args, config)
-        self._handle_ngrok_token(args, config)
-        self._handle_webapp_path(args, config)
-        self._handle_upload_folder(args, config)
-        self._handle_client_url(args, config)
-
-        _Hooks()._handle_argparse(args, config)
-
-    def _handle_port(self, args, config):
         if args.taipy_port:
             if str(args.taipy_port).strip() == "auto":
                 config["port"] = "auto"
@@ -221,57 +206,35 @@ class _Config(object):
                 _warn("Port value for --port option is not valid.")
             else:
                 config["port"] = int(args.taipy_port)
-
-    def _handle_host(self, args, config):
         if args.taipy_host:
             config["host"] = args.taipy_host
-
-    def _handle_debug(self, args, config):
         if args.taipy_debug:
             config["debug"] = True
         if args.taipy_no_debug:
             config["debug"] = False
-
-    def _handle_reloader(self, args, config):
         if args.taipy_use_reloader:
             config["use_reloader"] = True
         if args.taipy_no_reloader:
             config["use_reloader"] = False
-
-    def _handle_run_browser(self, args, config):
-        config["run_browser"] = True
-        if "--run-browser" in sys.argv:
+        if args.taipy_run_browser:
             config["run_browser"] = True
-        if "--no-run-browser" in sys.argv:
+        if args.taipy_no_run_browser:
             config["run_browser"] = False
-        elif getattr(args, "taipy_run_browser", False):
-            config["run_browser"] = True
-        elif getattr(args, "taipy_no_run_browser", False):
-            config["run_browser"] = False
-
-    def _handle_dark_mode(self, args, config):
         if args.taipy_dark_mode or args.taipy_light_mode:
             config["dark_mode"] = not args.taipy_light_mode
-
-    def _handle_ngrok_token(self, args, config):
         if args.taipy_ngrok_token:
             config["ngrok_token"] = args.taipy_ngrok_token
-
-    def _handle_webapp_path(self, args, config):
         if args.taipy_webapp_path:
             config["webapp_path"] = args.taipy_webapp_path
         elif os.environ.get("TAIPY_GUI_WEBAPP_PATH"):
             config["webapp_path"] = os.environ.get("TAIPY_GUI_WEBAPP_PATH")
-
-    def _handle_upload_folder(self, args, config):
         if args.taipy_upload_folder:
             config["upload_folder"] = args.taipy_upload_folder
         elif os.environ.get("TAIPY_GUI_UPLOAD_FOLDER"):
-            config["upload_folder"] = os.environ.get("TAIPY_GUI_UPLOAD_FOLDER")
-
-    def _handle_client_url(self, args, config):
+            config["webapp_path"] = os.environ.get("TAIPY_GUI_UPLOAD_FOLDER")
         if args.taipy_client_url:
             config["client_url"] = args.taipy_client_url
+        _Hooks()._handle_argparse(args, config)
 
     def _build_config(self, root_dir, env_filename, kwargs):  # pragma: no cover
         config = self.config
