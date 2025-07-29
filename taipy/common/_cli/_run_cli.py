@@ -56,10 +56,10 @@ class _RunCLI(_AbstractCLI):
 
         def add_taipy_prefix(key: str):
             """
-                Adds the '--taipy-' prefix to command-line arguments starting with '--'.
-                If the argument starts with '--no-', inserts 'taipy-' after '--no-'.
-                Otherwise, inserts 'taipy-' after '--'.
-                """
+            Adds the '--taipy-' prefix to command-line arguments starting with '--'.
+            If the argument starts with '--no-', inserts 'taipy-' after '--no-'.
+            Otherwise, inserts 'taipy-' after '--'.
+            """
             if key.startswith("--no-"):
                 return key[:5] + "taipy-" + key[5:]
             return key[:2] + "taipy-" + key[2:]
