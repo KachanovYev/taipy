@@ -22,6 +22,7 @@ import tempfile
 import time
 import typing as t
 import warnings
+import zoneinfo
 from importlib import metadata, util
 from inspect import currentframe, getabsfile, iscoroutinefunction, ismethod, ismodule
 from pathlib import Path
@@ -108,6 +109,38 @@ from .utils.chart_config_builder import _build_chart_config
 from .utils.table_col_builder import _enhance_columns
 from .utils.threads import _invoke_async_callback
 
+TIMEZONE_FALLBACKS = {
+    "Asia/Beijing": "Asia/Shanghai",
+}
+
+
+def _get_valid_timezone():
+    """
+    Determines a valid timezone name for the current system.
+
+    Returns:
+        str: The name of the timezone, or 'UTC' if an error occurs or the timezone is not found.
+
+     This function:
+        - Retrieves the local timezone using `tzlocal.get_localzone()`.
+        - Applies a fallback from the TIMEZONE_FALLBACKS dictionary if needed.
+        - Validates the timezone using `zoneinfo.ZoneInfo`.
+        - Falls back to 'UTC' if any error occurs.
+
+    Warning:
+        - `tzlocal.get_localzone()` may raise AttributeError if the local timezone cannot be determined.
+        - `TIMEZONE_FALLBACKS.get(tzname, tzname)` is safe and does not raise KeyError.
+        - `zoneinfo.ZoneInfo(tzname)` raises `ZoneInfoNotFoundError` if the timezone is unknown.
+    """
+    try:
+        tzname = str(tzlocal.get_localzone())
+        tzname = TIMEZONE_FALLBACKS.get(tzname, tzname)
+        zoneinfo.ZoneInfo(tzname)
+        return tzname
+    except (zoneinfo.ZoneInfoNotFoundError, AttributeError) as e:
+        _warn('Cannot retrieve time zone, default is "UTC"', e)
+        return "UTC"
+
 
 class Gui:
     """Entry point for the Graphical User Interface generation.
@@ -158,7 +191,7 @@ class Gui:
         _USER_CONTENT_URL,
     ]
 
-    __LOCAL_TZ = str(tzlocal.get_localzone())
+    __LOCAL_TZ = _get_valid_timezone()
 
     __extensions: t.Dict[str, t.List[ElementLibrary]] = {}
 
