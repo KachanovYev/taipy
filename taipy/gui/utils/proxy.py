@@ -10,9 +10,10 @@
 # specific language governing permissions and limitations under the License.
 
 import contextlib
+import threading
 import typing as t
 import warnings
-from threading import Thread
+from threading import Thread, Event
 from urllib.parse import quote as urlquote
 from urllib.parse import urlparse
 
@@ -22,16 +23,15 @@ from twisted.web.resource import Resource
 from twisted.web.server import NOT_DONE_YET, Site
 
 from .is_port_open import _is_port_open
-
 # flake8: noqa: E402
 from .singleton import _Singleton
 
 warnings.filterwarnings(
     "ignore",
     category=UserWarning,
-    message="You do not have a working installation of the service_identity module: 'No module named 'service_identity''.*",  # noqa: E501
+    message="You do not have a working installation of the service_identity module: 'No module named 'service_identity''.*",
+    # noqa: E501
 )
-
 
 if t.TYPE_CHECKING:
     from ..gui import Gui
@@ -93,23 +93,79 @@ class NotebookProxy(object, metaclass=_Singleton):
         self._listening_port = listening_port
         self._gui = gui
         self._is_running = False
+        self._thread: t.Optional[Thread] = None
+        self._stop_event = Event()
+        self._reactor_thread_id = None
 
     def run(self):
-        if self._is_running:
+        if self._is_running and self._thread and self._thread.is_alive():
             return
+
         host = self._gui._get_config("host", "127.0.0.1")
         port = self._listening_port
+
         if _is_port_open(host, port):
             raise ConnectionError(
-                f"Port {port} is already opened on {host}. You have another server application running on the same port."  # noqa: E501
+                f"Port {port} is already opened on {host}. "
+                f"You have another server application running on the same port."
             )
-        site = Site(_TaipyReverseProxyResource(host, b"", self._gui))
-        reactor.listenTCP(port, site)
-        Thread(target=reactor.run, args=(False,)).start()
+
+        self._thread = Thread(
+            target=self._run_reactor,
+            args=(host, port),
+            daemon=True,
+            name=f"TaipyNotebookProxy-{port}"
+        )
+
+        self._stop_event.clear()
+        self._thread.start()
         self._is_running = True
+
+        import time
+        time.sleep(0.1)
+
+    def _run_reactor(self, host: str, port: int):
+        try:
+            self._reactor_thread_id = threading.current_thread().ident
+            site = Site(_TaipyReverseProxyResource(host, b"", self._gui))
+            reactor.listenTCP(port, site)
+
+            reactor.run(installSignalHandlers=False)
+
+        except Exception as e:
+            print(f"Reactor error: {e}")
+        finally:
+            self._is_running = False
+            self._reactor_thread_id = None
 
     def stop(self):
         if not self._is_running:
             return
+
+        self._stop_event.set()
         self._is_running = False
-        reactor.stop()
+
+        if (self._reactor_thread_id and
+            threading.current_thread().ident == self._reactor_thread_id):
+            reactor.stop()
+        else:
+
+            reactor.callFromThread(reactor.stop)
+
+        if self._thread and self._thread.is_alive():
+            self._thread.join(timeout=2.0)
+
+            if self._thread.is_alive():
+                print(f"Warning: Proxy thread {self._thread.name} did not terminate cleanly")
+
+        self._thread = None
+        self._reactor_thread_id = None
+
+    def is_alive(self) -> bool:
+        return (self._is_running and
+                self._thread is not None and
+                self._thread.is_alive())
+
+    def __del__(self):
+        with contextlib.suppress(Exception):
+            self.stop()

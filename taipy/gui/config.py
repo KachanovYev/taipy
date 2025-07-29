@@ -18,7 +18,6 @@ import tzlocal
 from dotenv import dotenv_values
 
 from taipy.common.logger._taipy_logger import _TaipyLogger
-
 from ._gui_cli import _GuiCLI
 from ._hook import _Hooks
 from ._page import _Page
@@ -255,10 +254,12 @@ class _Config(object):
                     elif key == "port" and str(value).strip() == "auto":
                         config["port"] = "auto"
                     else:
-                        config[key] = value if config.get(key) is None else type(config.get(key))(value)  # type: ignore[reportCallIssue]
+                        config[key] = value if config.get(key) is None else type(config.get(key))(
+                            value)  # type: ignore[reportCallIssue]
                 except Exception as e:
                     _warn(
-                        f"Invalid keyword arguments value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
+                        f"Invalid keyword arguments value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",
+                        # noqa: E501
                         e,
                     )
         # Load config from env file
@@ -273,10 +274,12 @@ class _Config(object):
                             if isinstance(config[key], bool):
                                 config[key] = _is_true(value)
                             else:
-                                config[key] = value if config[key] is None else type(config[key])(value)  # type: ignore[reportCallIssue]
+                                config[key] = value if config[key] is None else type(config[key])(
+                                    value)  # type: ignore[reportCallIssue]
                     except Exception as e:
                         _warn(
-                            f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",  # noqa: E501
+                            f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",
+                            # noqa: E501
                             e,
                         )
 
