@@ -377,8 +377,7 @@ class _FlaskServer(_Server):
             if client_url is not None:
                 client_url = client_url.format(port=port)
                 _TaipyLogger._get_logger().info(f" * Application is accessible at {client_url}")
-        if not self.is_running_from_reloader() and self._gui._get_config("run_browser",
-                                                                         False):  # type: ignore[attr-defined]
+        if not self.is_running_from_reloader() and self._gui._get_config("run_browser", False):  # type: ignore[attr-defined]
             webbrowser.open(client_url or server_url, new=2)
         if _is_in_notebook() or run_in_thread:
             self._thread = KThread(target=self._run_notebook)
