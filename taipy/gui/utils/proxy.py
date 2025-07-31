@@ -98,7 +98,7 @@ class NotebookProxy(object, metaclass=_Singleton):
         self._is_running = False
         self._thread: t.Optional[Thread] = None
         self._stop_event = Event()
-        self._reactor_thread_id = None
+        self._reactor_thread_id: t.Optional[int] = None
 
     def run(self):
         if self._is_running and self._thread and self._thread.is_alive():
