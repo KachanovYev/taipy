@@ -129,7 +129,8 @@ class NotebookProxy(object, metaclass=_Singleton):
 
     def _run_reactor(self, host: str, port: int):
         try:
-            self._reactor_thread_id = threading.current_thread().ident or 0
+            ident = threading.current_thread().ident
+            self._reactor_thread_id = ident if ident is not None else 0
             site = Site(_TaipyReverseProxyResource(host, b"", self._gui))
             reactor.listenTCP(port, site)
 
