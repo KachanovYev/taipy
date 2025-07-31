@@ -13,7 +13,7 @@ import contextlib
 import threading
 import typing as t
 import warnings
-from threading import Thread, Event
+from threading import Event, Thread
 from urllib.parse import quote as urlquote
 from urllib.parse import urlparse
 
@@ -22,14 +22,17 @@ from twisted.web.proxy import ProxyClient, ProxyClientFactory
 from twisted.web.resource import Resource
 from twisted.web.server import NOT_DONE_YET, Site
 
+from .._warnings import _warn
 from .is_port_open import _is_port_open
+
 # flake8: noqa: E402
 from .singleton import _Singleton
 
 warnings.filterwarnings(
     "ignore",
     category=UserWarning,
-    message="You do not have a working installation of the service_identity module: 'No module named 'service_identity''.*",
+    message="You don't have a working installation of the service_identity module: "
+            "'No module named 'service_identity''.*",
     # noqa: E501
 )
 
@@ -133,7 +136,7 @@ class NotebookProxy(object, metaclass=_Singleton):
             reactor.run(installSignalHandlers=False)
 
         except Exception as e:
-            print(f"Reactor error: {e}")
+            _warn(f"Reactor error: {e}")
         finally:
             self._is_running = False
             self._reactor_thread_id = None
@@ -156,7 +159,7 @@ class NotebookProxy(object, metaclass=_Singleton):
             self._thread.join(timeout=2.0)
 
             if self._thread.is_alive():
-                print(f"Warning: Proxy thread {self._thread.name} did not terminate cleanly")
+                _warn(f"Warning: Proxy thread {self._thread.name} did not terminate cleanly")
 
         self._thread = None
         self._reactor_thread_id = None

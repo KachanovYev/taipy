@@ -11,7 +11,6 @@
 
 from __future__ import annotations
 
-import __main__
 import logging
 import os
 import pathlib
@@ -37,13 +36,15 @@ from flask_socketio import SocketIO
 from kthread import KThread
 from werkzeug.serving import is_running_from_reloader
 
+import __main__
 from taipy.common.logger._taipy_logger import _TaipyLogger
-from .request import _RequestAccessorFlask
-from ..server import _Server
+
 from ..._hook import _Hooks
 from ..._renderers.json import _TaipyJsonProvider
 from ...config import ServerConfig
 from ...utils import _is_in_notebook, _is_port_open, _RuntimeManager
+from ..server import _Server
+from .request import _RequestAccessorFlask
 
 if t.TYPE_CHECKING:
     from ...gui import Gui
@@ -170,7 +171,8 @@ class _FlaskServer(_Server):
                     )
                 except Exception:
                     raise RuntimeError(
-                        "Something is wrong with the taipy-gui front-end installation. Check that the js bundle has been properly built (is Node.js installed?)."
+                        "Something is wrong with the taipy-gui front-end installation. "
+                        "Check that the js bundle has been properly built (is Node.js installed?)."
                         # noqa: E501
                     ) from None
 

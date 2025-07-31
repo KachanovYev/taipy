@@ -18,6 +18,7 @@ import tzlocal
 from dotenv import dotenv_values
 
 from taipy.common.logger._taipy_logger import _TaipyLogger
+
 from ._gui_cli import _GuiCLI
 from ._hook import _Hooks
 from ._page import _Page
@@ -258,7 +259,8 @@ class _Config(object):
                             value)  # type: ignore[reportCallIssue]
                 except Exception as e:
                     _warn(
-                        f"Invalid keyword arguments value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",
+                        f"Invalid keyword arguments value in Gui.run(): {key} - {value}. "
+                        f"Unable to parse value to the correct type",
                         # noqa: E501
                         e,
                     )
@@ -278,7 +280,8 @@ class _Config(object):
                                     value)  # type: ignore[reportCallIssue]
                     except Exception as e:
                         _warn(
-                            f"Invalid env value in Gui.run(): {key} - {value}. Unable to parse value to the correct type",
+                            f"Invalid env value in Gui.run(): {key} - {value}. "
+                            f"Unable to parse value to the correct type",
                             # noqa: E501
                             e,
                         )
