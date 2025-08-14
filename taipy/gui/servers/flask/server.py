@@ -173,7 +173,6 @@ class _FlaskServer(_Server):
                     raise RuntimeError(
                         "Something is wrong with the taipy-gui front-end installation. "
                         "Check that the js bundle has been properly built (is Node.js installed?)."
-                        # noqa: E501
                     ) from None
 
             if path == "taipy.status.json":
