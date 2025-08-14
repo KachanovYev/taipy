@@ -260,9 +260,7 @@ class _Config(object):
                 except Exception as e:
                     _warn(
                         f"Invalid keyword arguments value in Gui.run(): {key} - {value}. "
-                        f"Unable to parse value to the correct type",
-                        # noqa: E501
-                        e,
+                        f"Unable to parse value to the correct type: {e}",
                     )
         # Load config from env file
         if os.path.isfile(env_file_abs_path):
@@ -281,9 +279,7 @@ class _Config(object):
                     except Exception as e:
                         _warn(
                             f"Invalid env value in Gui.run(): {key} - {value}. "
-                            f"Unable to parse value to the correct type",
-                            # noqa: E501
-                            e,
+                            f"Unable to parse value to the correct type: {e}",
                         )
 
         # Taipy-config

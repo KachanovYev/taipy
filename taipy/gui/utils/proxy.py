@@ -33,7 +33,6 @@ warnings.filterwarnings(
     category=UserWarning,
     message="You don't have a working installation of the service_identity module: "
             "'No module named 'service_identity''.*",
-    # noqa: E501
 )
 
 if t.TYPE_CHECKING:
