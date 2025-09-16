@@ -85,7 +85,6 @@ from .utils import (
     _hasscopeattr,
     _is_function,
     _is_in_notebook,
-    _is_plotly_figure,
     _is_unnamed_function,
     _LocalsContext,
     _MapDict,
@@ -446,7 +445,10 @@ class Gui:
             ]
         )
 
+        # Init Event Manager
         self.__event_manager = _EventManager()
+
+        self.__front_end_variables: t.Set[str] = set()
 
         # Init Gui Hooks
         _Hooks()._init(self)
@@ -1182,9 +1184,13 @@ class Gui:
                 modified_vars.remove(v.get_name())
             elif isinstance(v, _DoNotUpdate):
                 modified_vars.remove(k)
+        custom_page_filtered_types = _Hooks()._get_resource_handler_data_layer_supported_types()
+        in_custom_page_context = _Hooks()._is_in_custom_page_context()
         for _var in modified_vars:
+            if not self.__is_front_end_variable(_var) and not in_custom_page_context:
+                _TaipyLogger._get_logger().debug(f"Skipping variable '{_var}' not in front-end.")
+                continue
             newvalue = values.get(_var)
-            custom_page_filtered_types = _Hooks()._get_resource_handler_data_layer_supported_types()
             if isinstance(newvalue, (_TaipyData)) or (
                 custom_page_filtered_types and isinstance(newvalue, custom_page_filtered_types)
             ):  # type: ignore
@@ -1211,9 +1217,7 @@ class Gui:
                     is_json = isinstance(newvalue, _TaipyToJson)
                     newvalue = newvalue.get()
                 # Skip in taipy-gui, available in custom frontend
-                if isinstance(newvalue, (dict, _MapDict)) and not _Hooks()._is_in_custom_page_context():
-                    continue
-                if _is_plotly_figure(newvalue):
+                if isinstance(newvalue, (dict, _MapDict)) and not in_custom_page_context:
                     continue
                 if isinstance(newvalue, float) and math.isnan(newvalue):
                     # do not let NaN go through json, it is not handle well (dies silently through websocket)
@@ -3107,3 +3111,9 @@ class Gui:
         finally:
             if this_sid:
                 get_server_request_accessor(self).set_sid(this_sid)
+
+    def _add_front_end_variable(self, var_name: str):
+        self.__front_end_variables.add(var_name)
+
+    def __is_front_end_variable(self, var_name: str) -> bool:
+        return var_name in self.__front_end_variables
